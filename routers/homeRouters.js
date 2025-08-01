@@ -7,8 +7,11 @@ import {
   allProductsFilter,
   allCategories,
   allCategoriesFilter,
+  allBrands,
+  allBrandsFilter,
   getSingleProduct,
   getProductsByCategory,
+  getProductsByBrand,
   addProduct,
   updateProduct,
   deleteProduct,
@@ -28,12 +31,15 @@ homeRouter.post("/productsFilter", protect, allProductsFilter);
 // Get all categories or category names only
 homeRouter.get("/categories", protect, allCategories);
 homeRouter.get("/categories/names", protect, allCategoriesFilter); // For when name filter is needed
+homeRouter.get("/brands", protect, allBrands);
+homeRouter.get("/brands/names", protect, allBrandsFilter); // For when name filter is needed
 
 // Get single product by ID
 homeRouter.get("/products/:id", protect, getSingleProduct);
 
 // Get products by category
 homeRouter.get("/products/category/:category", protect, getProductsByCategory);
+homeRouter.get("/products/brand/:brand", getProductsByBrand);
 
 // Add new product (simulated)
 homeRouter.post("/products", protect, addProduct);

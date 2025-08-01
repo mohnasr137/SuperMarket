@@ -117,8 +117,17 @@ const allProductsFilter = async (req, res) => {
 const allCategories = async (req, res) => {
   try {
     // Get all categories with details
-    const response = await axios.get(`${DUMMY_JSON_BASE_URL}/products/categories`);
+    const response = await axios.get(
+      `${DUMMY_JSON_BASE_URL}/products/categories`
+    );
     const list = response.data;
+
+    await Promise.all(
+      list.map(async (item) => {
+        const images = await axios.get(item.url);
+        item.image = images.data.products[0].images[0];
+      })
+    );
 
     if (list.length === 0) {
       return res.status(404).json({ message: "there is no result" });
@@ -130,14 +139,76 @@ const allCategories = async (req, res) => {
   }
 };
 
+const allBrands = async (req, res) => {
+  try {
+    const emojiMap = {
+      Essence: "💄",
+      "Glamour Beauty": "✨",
+      "Velvet Touch": "🪞",
+      "Chic Cosmetics": "👛",
+      "Nail Couture": "💅",
+      "Calvin Klein": "👔",
+      Chanel: "👗",
+      Dior: "👜",
+      "Dolce & Gabbana": "👠",
+      Gucci: "🕶️",
+      "Annibale Colombo": "🛋️",
+      "Furniture Co.": "🪑",
+      Knoll: "🏢",
+      "Bath Trends": "🛁",
+    };
+
+    const response = await axios.get(`${DUMMY_JSON_BASE_URL}/products`);
+    const list = response.data.products;
+
+    const brands = list.map((item) => item.brand);
+    const uniqueBrands = [...new Set(brands)];
+
+    const filteredBrands = uniqueBrands.filter(
+      (brand) => brand !== null && brand !== undefined
+    );
+
+    const brandWithEmoji = filteredBrands.map((brand) => ({
+      name: brand,
+      emoji: emojiMap[brand] || "",
+    }));
+
+    if (list.length === 0) {
+      return res.status(404).json({ message: "there is no result" });
+    } else {
+      return res.status(200).json({ list: brandWithEmoji });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 const allCategoriesFilter = async (req, res) => {
   try {
     // Get category list (just names)
-    const response = await axios.get(`${DUMMY_JSON_BASE_URL}/products/category-list`);
+    const response = await axios.get(
+      `${DUMMY_JSON_BASE_URL}/products/category-list`
+    );
     const list = response.data.map((categoryName) => ({
       name: categoryName,
     }));
     return res.status(200).json({ list });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const allBrandsFilter = async (req, res) => {
+  try {
+    const response = await axios.get(`${DUMMY_JSON_BASE_URL}/products`);
+    const list = response.data.products.map((brandName) => ({
+      name: brandName.brand,
+    }));
+    const uniqueBrands = [...new Set(list)];
+    const filteredBrands = uniqueBrands.filter(
+      (brand) => brand !== null && brand !== undefined
+    );
+    return res.status(200).json({ list: filteredBrands });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -177,6 +248,53 @@ const getProductsByCategory = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
+  }
+};
+
+const getProductsByBrand = async (req, res) => {
+  try {
+    const { brand } = req.params;
+    let { skip = 0, limit = 10 } = req.query;
+
+    // Input validation
+    if (!brand) {
+      return res.status(400).json({ message: "Brand parameter is required" });
+    }
+
+    skip = parseInt(skip);
+    limit = parseInt(limit);
+
+    if (isNaN(skip) || isNaN(limit) || skip < 0 || limit <= 0) {
+      return res.status(400).json({ message: "Invalid skip or limit value" });
+    }
+
+    // Fetch ALL products
+    const response = await axios.get(`${DUMMY_JSON_BASE_URL}/products`);
+    const allProducts = response.data?.products || [];
+
+    // Filter by brand (case-insensitive)
+    const filteredProducts = allProducts.filter(
+      (product) => product.brand?.toLowerCase() === brand.toLowerCase()
+    );
+
+    // Apply pagination
+    const paginatedProducts = filteredProducts.slice(skip, skip + limit);
+
+    if (paginatedProducts.length === 0) {
+      return res.status(404).json({ message: "No products found for this brand" });
+    }
+
+    return res.status(200).json({
+      list: paginatedProducts,
+      total: filteredProducts.length, // Total matching products (not just paginated count)
+      skip,
+      limit,
+    });
+  } catch (error) {
+    console.error("Error fetching products:", error.message);
+    return res.status(500).json({
+      message: error.response?.data?.message || "Failed to fetch products",
+    });
   }
 };
 
@@ -232,6 +350,9 @@ export {
   allProductsFilter,
   allCategories,
   allCategoriesFilter,
+  getProductsByBrand,
+  allBrands,
+  allBrandsFilter,
   getSingleProduct,
   getProductsByCategory,
   addProduct,
