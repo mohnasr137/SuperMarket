@@ -71,26 +71,20 @@ const userSchema = mongoose.Schema(
     },
     myProduct: [
       {
-        type: mongoose.Schema.ObjectId,
-        ref: "Product",
+        type: String,
+        trim: true,
       },
     ],
     cart: [
       {
-        type: mongoose.Schema.ObjectId,
-        ref: "Product",
+        type: String,
+        trim: true,
       },
     ],
     favorite: [
       {
-        type: mongoose.Schema.ObjectId,
-        ref: "Product",
-      },
-    ],
-    buyAgain: [
-      {
-        type: mongoose.Schema.ObjectId,
-        ref: "Product",
+        type: String,
+        trim: true,
       },
     ],
   },

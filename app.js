@@ -15,6 +15,7 @@ dotenv.config();
 import authRoutes from './routers/authRouters.js';
 import homeRouters from "./routers/homeRouters.js";
 import portfoiloRouters from "./routers/portfoiloRouters.js";
+import userRouters from "./routers/user.js";
 
 const app = express();
 const url = process.env.API_URL;
@@ -47,6 +48,7 @@ app.use(
 app.use(`${url}/auth`, authRoutes);
 app.use(`${url}/home`, homeRouters);
 app.use(`${url}/portfoilo`, portfoiloRouters);
+app.use(`${url}/user`, userRouters);
 
 app.use(`/:error`, (req, res) => {
   const { error } = req.params;
