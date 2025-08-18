@@ -35,12 +35,12 @@ app.use(limiter);
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 
+// app.use(
+//   `${url}/uploads`,
+//   express.static(path.join(__dirname, "images", "uploads"))
+// );
 app.use(
-  `${url}/uploads`,
-  express.static(path.join(__dirname, "images", "uploads"))
-);
-app.use(
-  `${url}/portfolio`,
+  `${url}/images/portfolio`,
   express.static(path.join(__dirname, "images", "portfolio"))
 );
 
