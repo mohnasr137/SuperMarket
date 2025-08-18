@@ -71,19 +71,19 @@ const userSchema = mongoose.Schema(
     },
     myProduct: [
       {
-        type: String,
+        type: Object,
         trim: true,
       },
     ],
     cart: [
       {
-        type: String,
+        type: Object,
         trim: true,
       },
     ],
     favorite: [
       {
-        type: String,
+        type: Object,
         trim: true,
       },
     ],
